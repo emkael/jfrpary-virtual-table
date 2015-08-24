@@ -7,7 +7,7 @@ tournament_path_prefix = sys.argv[1] + '.html'
 output_path = path.dirname(tournament_path_prefix)
 tournament_prefix = path.splitext(path.realpath(tournament_path_prefix))[0]
 
-tournament_files_match = re.compile(tournament_prefix + '([0-9]{3})\.txt')
+tournament_files_match = re.compile(re.escape(tournament_prefix) + '([0-9]{3})\.txt')
 tournament_files = [f for f in glob.glob(tournament_prefix + '*.txt') if re.search(tournament_files_match, f)]
 
 virtual_pairs = []
@@ -31,7 +31,7 @@ for tournament_file in tournament_files:
                         cell.contents = ''
                     header_added = True
             board_text.seek(0)
-            board_text.write(board_text_content.body.table.prettify('iso-8859-2'))
+            board_text.write(board_text_content.table.prettify('iso-8859-2', formatter='html'))
             board_text.truncate()
 
 with file(tournament_prefix + 'WYN.txt', 'r+') as results_file:
@@ -46,7 +46,7 @@ with file(tournament_prefix + 'WYN.txt', 'r+') as results_file:
             except ValueError:
                 pass
     results_file.seek(0)
-    results_file.write(results_text_content.body.table.prettify('iso-8859-2'))
+    results_file.write(results_text_content.table.prettify('iso-8859-2'))
     results_file.truncate()
 
 with file(tournament_prefix + 'zbior.html', 'r+') as results_file:
