@@ -19,11 +19,14 @@ class JFRVirtualTable:
         traveller_files_match = re.compile(
             re.escape(tournament_prefix) + '([0-9]{3})\.txt'
         )
-        # TODO: refaktoryzacja tych wszystkich path.join
+
+        def get_path(relative_path):
+            return path.join(tournament_path, relative_path)
+
         self.__traveller_files = [
             f for f
             in glob.glob(
-                path.join(tournament_path, tournament_prefix) + '*.txt'
+                get_path(tournament_prefix + '*.txt')
             )
             if re.search(traveller_files_match, f)
         ]
@@ -33,24 +36,16 @@ class JFRVirtualTable:
         self.__pair_records_files = [
             f for f
             in glob.glob(
-                path.join(tournament_path, 'H-' + tournament_prefix + '*.html')
+                get_path('H-' + tournament_prefix + '*.html')
             )
             if re.search(records_files_match, f)
         ]
-        self.__results_file = path.join(
-            tournament_path,
-            tournament_prefix + 'WYN.txt'
-        )
-        self.__full_results_file = path.join(
-            tournament_path,
-            'W-' + tournament_prefix + '.html'
-        )
-        self.__pair_records_list_file = path.join(
-            tournament_path,
+        self.__results_file = get_path(tournament_prefix + 'WYN.txt')
+        self.__full_results_file = get_path('W-' + tournament_prefix + '.html')
+        self.__pair_records_list_file = get_path(
             'H-' + tournament_prefix + '-lista.html'
         )
-        self.__collected_scores_file = path.join(
-            tournament_path,
+        self.__collected_scores_file = get_path(
             tournament_prefix + 'zbior.html'
         )
 
@@ -122,21 +117,54 @@ class JFRVirtualTable:
 
     @__fix_file
     def __fix_records_list(self, content):
-        # TODO: ułożyć ponownie komórki w tabelce
-        cells = content.select('td.u')
+        row_cell_count = int(content.table.select('tr td.o')[0]['colspan'])
+        rows = content.select('tr')
+        link_rows = []
+        link_cells = []
+        for row in rows:
+            cells = row.select('td.u')
+            cells_found = False
+            for cell in cells:
+                cell_links = [
+                    link for link
+                    in cell.select('a.pa')
+                    if link['href'].startswith(
+                        'H-'
+                    ) and not link['href'].endswith(
+                        'lista.html'
+                    )
+                ]
+                if len(cell_links):
+                    if int(cell_links[0].contents[0]) in self.__virtual_pairs:
+                        cell.extract()
+                    else:
+                        link_cells.append(cell)
+                    cells_found = True
+            if cells_found:
+                link_rows.append(row)
+        cells = map(lambda cell: cell.extract(), link_cells)
+        for row in link_rows:
+            row.extract()
+        while len(cells) >= 20:
+            new_row = content.new_tag('tr')
+            first_cell = content.new_tag('td', **{'class': 'n'})
+            first_cell.string = u'\xa0'
+            new_row.append(first_cell)
+            for cell in cells[0:20]:
+                new_row.append(cell)
+            content.table.append(new_row)
+            del cells[0:20]
+        last_row = content.new_tag('tr')
+        first_cell = content.new_tag('td', **{'class': 'n'})
+        first_cell.string = u'\xa0'
+        last_row.append(first_cell)
         for cell in cells:
-            cell_links = [
-                link for link
-                in cell.select('a.pa')
-                if link['href'].startswith(
-                    'H-'
-                ) and not link['href'].endswith(
-                    'lista.html'
-                )
-            ]
-            if len(cell_links):
-                if int(cell_links[0].contents[0]) in self.__virtual_pairs:
-                    cell.extract()
+            last_row.append(cell)
+        if len(cells) < 20:
+            last_cell = content.new_tag('td', colspan=20-len(cells))
+            last_cell.string = u'\xa0'
+            last_row.append(last_cell)
+        content.table.append(last_row)
         return content
 
     @__fix_file
@@ -162,34 +190,38 @@ class JFRVirtualTable:
             rows = [
                 row for row
                 in content.select('tr')
-                if len(row.select('td')) >= 10
+                if len(row.select('td')) >= 3
             ]
             header_added = False
             for row in rows:
                 cells = row.select('td')
-                if int(cells[1].contents[0]) in self.__virtual_pairs:
-                    if int(cells[2].contents[0]) in self.__virtual_pairs:
-                        if header_added:
-                            row.extract()
-                        else:
-                            virtual_row = content.new_tag(
-                                'tr',
-                                **{'class': 'virtualTable'}
-                            )
-                            virtual_row.append(
-                                content.new_tag('td', **{'class': 'n'})
-                            )
-                            virtual_row_header = content.new_tag(
-                                'td',
-                                colspan=10, **{'class': 'noc'}
-                            )
-                            virtual_row_header.string = 'Wirtualny stolik:'
-                            virtual_row.append(virtual_row_header)
-                            row.insert_before(virtual_row)
-                            for cell in cells[1:3]:
-                                cell.contents = ''
-                            header_added = True
-            # TODO: przesunąć wiersz wirtualnego stolika na dół tabeli
+                if header_added:
+                    row_below = row.extract()
+                    if len(cells) >= 10:
+                        virtual_row.insert_before(row_below)
+                if len(cells) >= 10:
+                    if int(cells[1].contents[0]) in self.__virtual_pairs:
+                        if int(cells[2].contents[0]) in self.__virtual_pairs:
+                            if header_added:
+                                row.extract()
+                            else:
+                                virtual_row = content.new_tag(
+                                    'tr',
+                                    **{'class': 'virtualTable'}
+                                )
+                                virtual_row.append(
+                                    content.new_tag('td', **{'class': 'n'})
+                                )
+                                virtual_row_header = content.new_tag(
+                                    'td',
+                                    colspan=10, **{'class': 'noc'}
+                                )
+                                virtual_row_header.string = 'Wirtualny stolik:'
+                                virtual_row.append(virtual_row_header)
+                                row.insert_before(virtual_row)
+                                for cell in cells[1:3]:
+                                    cell.contents = ''
+                                header_added = True
         return content.table
 
     __traveller_files = []
