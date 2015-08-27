@@ -104,7 +104,9 @@ class JFRVirtualTable:
             cell_links = [
                 link for link
                 in row.select('td a')
-                if link['href'].startswith(
+                if link.has_attr(
+                    'href'
+                ) and link['href'].startswith(
                     'H-'
                 ) and not link['href'].endswith(
                     'lista.html'
@@ -128,7 +130,9 @@ class JFRVirtualTable:
                 cell_links = [
                     link for link
                     in cell.select('a.pa')
-                    if link['href'].startswith(
+                    if link.has_attr(
+                        'href'
+                    ) and link['href'].startswith(
                         'H-'
                     ) and not link['href'].endswith(
                         'lista.html'
