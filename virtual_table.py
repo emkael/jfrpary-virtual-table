@@ -9,6 +9,7 @@ from os import path
 from bs4 import BeautifulSoup as bs4
 from bs4.element import NavigableString
 
+
 class JFRVirtualTable:
 
     def __parse_filepaths(self, prefix):
@@ -18,6 +19,7 @@ class JFRVirtualTable:
         traveller_files_match = re.compile(
             re.escape(tournament_prefix) + '([0-9]{3})\.txt'
         )
+        # TODO: refaktoryzacja tych wszystkich path.join
         self.__traveller_files = [
             f for f
             in glob.glob(
@@ -31,7 +33,7 @@ class JFRVirtualTable:
         self.__pair_records_files = [
             f for f
             in glob.glob(
-                path.join(tournament_path, 'H-' + tournament_prefix) + '*.html'
+                path.join(tournament_path, 'H-' + tournament_prefix + '*.html')
             )
             if re.search(records_files_match, f)
         ]
@@ -60,7 +62,9 @@ class JFRVirtualTable:
                 record = bs4(record_file)
                 header = [
                     con for con in record.select('td.o1')[0].contents
-                    if type(con) is NavigableString and re.match(pair_header_match, con)
+                    if type(con) is NavigableString and re.match(
+                            pair_header_match, con
+                    )
                 ]
                 if len(header):
                     header_match = re.match(pair_header_match, header[0])
@@ -79,7 +83,9 @@ class JFRVirtualTable:
                 content = bs4(content_file, from_encoding=encoding)
                 content = worker(self, content)
                 content_file.seek(0)
-                content_file.write(content.prettify(encoding, formatter='html'))
+                content_file.write(
+                    content.prettify(encoding, formatter='html')
+                )
                 content_file.truncate()
         return file_wrapper
 
@@ -103,10 +109,15 @@ class JFRVirtualTable:
             cell_links = [
                 link for link
                 in row.select('td a')
-                if link['href'].startswith('H-') and not link['href'].endswith('lista.html')
+                if link['href'].startswith(
+                    'H-'
+                ) and not link['href'].endswith(
+                    'lista.html'
+                )
             ]
-            if len(cell_links) and int(cell_links[0].contents[0]) in self.__virtual_pairs:
-                row.extract()
+            if len(cell_links):
+                if int(cell_links[0].contents[0]) in self.__virtual_pairs:
+                    row.extract()
         return content
 
     @__fix_file
@@ -117,10 +128,15 @@ class JFRVirtualTable:
             cell_links = [
                 link for link
                 in cell.select('a.pa')
-                if link['href'].startswith('H-') and not link['href'].endswith('lista.html')
+                if link['href'].startswith(
+                    'H-'
+                ) and not link['href'].endswith(
+                    'lista.html'
+                )
             ]
-            if len(cell_links) and  int(cell_links[0].contents[0]) in self.__virtual_pairs:
-                cell.extract()
+            if len(cell_links):
+                if int(cell_links[0].contents[0]) in self.__virtual_pairs:
+                    cell.extract()
         return content
 
     @__fix_file
@@ -130,31 +146,49 @@ class JFRVirtualTable:
             cells = row.select('td')
             if len(cells) == 7:
                 try:
-                    if int(cells[1].contents[0]) in self.__virtual_pairs and int(cells[2].contents[0]) in self.__virtual_pairs:
-                        row.extract()
+                    if int(cells[1].contents[0]) in self.__virtual_pairs:
+                        if int(cells[2].contents[0]) in self.__virtual_pairs:
+                            row.extract()
                 except ValueError:
                     pass
-            if len(cells) == 1 and cells[0]['colspan'] == '7' and cells[0].contents[0] == '&nbsp':
-                row.extract()
+            if len(cells) == 1 and cells[0]['colspan'] == '7':
+                if cells[0].contents[0] == '&nbsp':
+                    row.extract()
         return content
 
     @__fix_file
     def __fix_traveller(self, content):
         if not len(content.select('tr.virtualTable')):
-            rows = [row for row in content.select('tr') if len(row.select('td')) >= 10]
+            rows = [
+                row for row
+                in content.select('tr')
+                if len(row.select('td')) >= 10
+            ]
             header_added = False
             for row in rows:
                 cells = row.select('td')
-                if int(cells[1].contents[0]) in self.__virtual_pairs and int(cells[2].contents[0]) in self.__virtual_pairs:
-                    if header_added:
-                        row.extract()
-                    else:
-                        row.insert_before(
-                            bs4('<tr class="virtualTable"><td class="n"></td><td class="noc" colspan="10">Wirtualny stolik:</td></tr>')
-                        )
-                        for cell in cells[1:3]:
-                            cell.contents = ''
-                        header_added = True
+                if int(cells[1].contents[0]) in self.__virtual_pairs:
+                    if int(cells[2].contents[0]) in self.__virtual_pairs:
+                        if header_added:
+                            row.extract()
+                        else:
+                            virtual_row = content.new_tag(
+                                'tr',
+                                **{'class': 'virtualTable'}
+                            )
+                            virtual_row.append(
+                                content.new_tag('td', **{'class': 'n'})
+                            )
+                            virtual_row_header = content.new_tag(
+                                'td',
+                                colspan=10, **{'class': 'noc'}
+                            )
+                            virtual_row_header.string = 'Wirtualny stolik:'
+                            virtual_row.append(virtual_row_header)
+                            row.insert_before(virtual_row)
+                            for cell in cells[1:3]:
+                                cell.contents = ''
+                            header_added = True
             # TODO: przesunąć wiersz wirtualnego stolika na dół tabeli
         return content.table
 
