@@ -244,15 +244,12 @@ class JFRVirtualTable:
                             else:
                                 virtual_row = content.new_tag(
                                     'tr',
-                                    **{'class': 'virtualTable'}
-                                )
+                                    **{'class': 'virtualTable'})
                                 virtual_row.append(
-                                    content.new_tag('td', **{'class': 'n'})
-                                )
+                                    content.new_tag('td', **{'class': 'n'}))
                                 virtual_row_header = content.new_tag(
                                     'td',
-                                    colspan=10, **{'class': 'noc'}
-                                )
+                                    colspan=10, **{'class': 'noc'})
                                 virtual_row_header.string = 'Wirtualny stolik:'
                                 virtual_row.append(virtual_row_header)
                                 row.insert_before(virtual_row)
