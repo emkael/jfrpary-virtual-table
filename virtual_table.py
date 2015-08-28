@@ -229,7 +229,6 @@ class JFRVirtualTable:
                     # only move it if it has meaningful information (10 cells)
                     if len(cells) >= 10:
                         virtual_row.insert_before(row_below)
-                    continue
                 # we're looking for a "proper" row, with at least 10 cells
                 if len(cells) >= 10:
                     # and with both pair numbers virtual
@@ -250,7 +249,7 @@ class JFRVirtualTable:
                                 virtual_row_header = content.new_tag(
                                     'td',
                                     colspan=10, **{'class': 'noc'})
-                                virtual_row_header.string = 'Wirtualny stolik:'
+                                virtual_row_header.string = self.__header_text
                                 virtual_row.append(virtual_row_header)
                                 row.insert_before(virtual_row)
                                 # clear pair numbers
@@ -265,12 +264,15 @@ class JFRVirtualTable:
     __full_results_file = None
     __pair_records_list_file = None
     __collected_scores_file = None
+    # text for traveller header row
+    __header_text = ''
 
-    def __init__(self, path_prefix, virtual_pairs=None):
+    def __init__(self, path_prefix, virtual_pairs=None, header_text=''):
         self.__parse_filepaths(path_prefix)
-        if virtual_pairs is None:
+        if virtual_pairs is None or len(virtual_pairs) == 0:
             virtual_pairs = self.__detect_virtual_pairs()
         self.__virtual_pairs = virtual_pairs
+        self.__header_text = header_text
 
     def fix_results(self):
         self.__fix_results(self.__results_file)
@@ -288,12 +290,27 @@ class JFRVirtualTable:
         for traveller_file in self.__traveller_files:
             self.__fix_traveller(traveller_file, encoding='iso-8859-2')
 
-table_parser = JFRVirtualTable(
-    path_prefix=sys.argv[1],
-    virtual_pairs=map(int, sys.argv[2:]) if len(sys.argv) > 2 else None
-)
-table_parser.fix_results()
-table_parser.fix_full_results()
-table_parser.fix_collected_scores()
-table_parser.fix_records_list()
-table_parser.fix_travellers()
+if __name__ == '__main__':
+    import argparse
+
+    argument_parser = argparse.ArgumentParser(
+        description='Fix display for virtual tables in JFR Pary result pages')
+    argument_parser.add_argument('path', metavar='PATH',
+                                 help='tournament path with JFR prefix')
+    argument_parser.add_argument('--text', metavar='HEADER',
+                                 default='Wirtualny stolik:',
+                                 help='traveller header for virtual score')
+    argument_parser.add_argument('pairs', metavar='PAIR_NO', nargs='*',
+                                 type=int, help='virtual pair numbers')
+
+    arguments = argument_parser.parse_args()
+
+    table_parser = JFRVirtualTable(
+        path_prefix=arguments.path,
+        virtual_pairs=arguments.pairs,
+        header_text=arguments.text)
+    table_parser.fix_results()
+    table_parser.fix_full_results()
+    table_parser.fix_collected_scores()
+    table_parser.fix_records_list()
+    table_parser.fix_travellers()
