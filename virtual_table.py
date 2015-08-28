@@ -218,6 +218,7 @@ class JFRVirtualTable:
                 if len(row.select('td')) >= 3]
             # only the first "virtual" row needs to be prefixed with a header
             header_added = False
+            virtual_row = None
             for row in rows:
                 cells = row.select('td')
                 # if we're already added a header, meaning we're below the first
