@@ -64,7 +64,7 @@ class JFRVirtualTable:
                 header = [con for con
                           in record.select('td.o1')[0].contents
                           if type(con) is NavigableString and re.match(
-                          pair_header_match, con)]
+                                  pair_header_match, con)]
                 if len(header):
                     header_match = re.match(pair_header_match, header[0])
                     pair_number = int(header_match.group(1))
@@ -214,14 +214,14 @@ class JFRVirtualTable:
         if not len(content.select('tr.virtualTable')):
             # looking for all the rows with more than 2 cells
             rows = [row for row
-                in content.select('tr')
-                if len(row.select('td')) >= 3]
+                    in content.select('tr')
+                    if len(row.select('td')) >= 3]
             # only the first "virtual" row needs to be prefixed with a header
             header_added = False
             virtual_row = None
             for row in rows:
                 cells = row.select('td')
-                # if we're already added a header, meaning we're below the first
+                # we're already added a header, meaning we're below the first
                 # virtual table, we need to move the row above it
                 # or remove it entirely
                 if header_added:
