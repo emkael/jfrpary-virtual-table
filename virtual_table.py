@@ -1,9 +1,8 @@
-# coding=utf-8
-
 import sys
 import glob
 import re
 import math
+import copy
 
 from os import path
 from bs4 import BeautifulSoup as bs4
@@ -16,62 +15,69 @@ class JFRVirtualTable:
         file_path = path.realpath(prefix + '.html')
         tournament_path = path.dirname(file_path)
         tournament_prefix = path.splitext(path.basename(file_path))[0]
+
+        # RegEx matching traveller files for each board
         traveller_files_match = re.compile(
             re.escape(tournament_prefix) + '([0-9]{3})\.txt'
         )
 
+        # converts {prefix}{anything}.{ext} filename to full path
         def get_path(relative_path):
             return path.join(tournament_path, relative_path)
 
-        self.__traveller_files = [
-            f for f
-            in glob.glob(
-                get_path(tournament_prefix + '*.txt')
-            )
-            if re.search(traveller_files_match, f)
-        ]
+        # filtering out traveller files from all TXT files
+        self.__traveller_files = [f for f
+                                  in glob.glob(
+                                      get_path(tournament_prefix + '*.txt'))
+                                  if re.search(traveller_files_match, f)]
+
+        # RegEx for matching pair record files
         records_files_match = re.compile(
-            'H-' + tournament_prefix + '-([0-9]{1,3})\.html'
-        )
+            'H-' + tournament_prefix + '-([0-9]{1,3})\.html')
         self.__pair_records_files = [
             f for f
-            in glob.glob(
-                get_path('H-' + tournament_prefix + '*.html')
-            )
+            in glob.glob(get_path('H-' + tournament_prefix + '*.html'))
             if re.search(records_files_match, f)
         ]
-        self.__results_file = get_path(tournament_prefix + 'WYN.txt')
-        self.__full_results_file = get_path('W-' + tournament_prefix + '.html')
-        self.__pair_records_list_file = get_path(
-            'H-' + tournament_prefix + '-lista.html'
-        )
-        self.__collected_scores_file = get_path(
-            tournament_prefix + 'zbior.html'
-        )
 
+        # short rersult list, from side frame
+        self.__results_file = get_path(tournament_prefix + 'WYN.txt')
+        # full results page
+        self.__full_results_file = get_path('W-' + tournament_prefix + '.html')
+        # list of pair records links page
+        self.__pair_records_list_file = get_path(
+            'H-' + tournament_prefix + '-lista.html')
+        # collected scores page
+        self.__collected_scores_file = get_path(
+            tournament_prefix + 'zbior.html')
+
+    # auto-detect virtual pairs by their record file header
     def __detect_virtual_pairs(self):
         virtual_pairs = []
+        # RegEx for matching pair number and names in pair record header
         pair_header_match = re.compile('([0-9]{1,}): (.*) - (.*), .*')
         for record_file_path in self.__pair_records_files:
             with file(record_file_path) as record_file:
                 record = bs4(record_file)
-                header = [
-                    con for con in record.select('td.o1')[0].contents
-                    if type(con) is NavigableString and re.match(
-                            pair_header_match, con
-                    )
-                ]
+                # first <td class="o1"> with content matching
+                # pair header is what we're after
+                header = [con for con
+                          in record.select('td.o1')[0].contents
+                          if type(con) is NavigableString and re.match(
+                          pair_header_match, con)]
                 if len(header):
                     header_match = re.match(pair_header_match, header[0])
                     pair_number = int(header_match.group(1))
-                    names = filter(
-                        len,
-                        [header_match.group(2), header_match.group(3)]
-                    )
+                    names = filter(len,
+                                   [header_match.group(2),
+                                    header_match.group(3)])
+                    # virtual pair does not have any names filled
                     if len(names) == 0:
                         virtual_pairs.append(pair_number)
         return sorted(virtual_pairs)
 
+    # wrapper for DOM manipulation
+    # wraps the inner function into BS4 invokation and file overwrite
     def __fix_file(worker):
         def file_wrapper(self, file_path, encoding='utf-8'):
             with file(file_path, 'r+') as content_file:
@@ -84,130 +90,156 @@ class JFRVirtualTable:
                 content_file.truncate()
         return file_wrapper
 
+    # fix simple results list by removing virtual pair rows
     @__fix_file
     def __fix_results(self, content):
         rows = content.select('tr')
         for row in rows:
             cells = row.select('td')
+            # 6 or more cells in a "proper" result row
+            # (may contain carry over or penalties)
             if len(cells) >= 6:
                 try:
+                    # third cell in the row is pair number
                     if int(cells[2].contents[0]) in self.__virtual_pairs:
                         row.extract()
                 except ValueError:
                     pass
         return content.table
 
+    # fix full results file by removing virtual pair rows
     @__fix_file
     def __fix_full_results(self, content):
         rows = content.select('tr')
         for row in rows:
-            cell_links = [
-                link for link
-                in row.select('td a')
-                if link.has_attr(
-                    'href'
-                ) and link['href'].startswith(
-                    'H-'
-                ) and not link['href'].endswith(
-                    'lista.html'
-                )
-            ]
+            # select rows by cells containing pair records links
+            cell_links = [link for link
+                          in row.select('td a')
+                          if link.has_attr('href') and
+                          link['href'].startswith('H-') and
+                          not link['href'].endswith('lista.html')]
+            # remove these containing links to virtual pairs
             if len(cell_links):
                 if int(cell_links[0].contents[0]) in self.__virtual_pairs:
                     row.extract()
         return content
 
+    # fix the page with pair records links list
     @__fix_file
     def __fix_records_list(self, content):
+        # read the original column count
         row_cell_count = int(content.table.select('tr td.o')[0]['colspan'])
         rows = content.select('tr')
+        # gather rows which containted any links
         link_rows = []
+        # gather cells which should stay
         link_cells = []
         for row in rows:
             cells = row.select('td.u')
             cells_found = False
             for cell in cells:
-                cell_links = [
-                    link for link
-                    in cell.select('a.pa')
-                    if link.has_attr(
-                        'href'
-                    ) and link['href'].startswith(
-                        'H-'
-                    ) and not link['href'].endswith(
-                        'lista.html'
-                    )
-                ]
+                # select cells by pair records links inside
+                cell_links = [link for link
+                              in cell.select('a.pa')
+                              if link.has_attr('href') and
+                              link['href'].startswith('H-') and
+                              not link['href'].endswith('lista.html')]
                 if len(cell_links):
+                    # delete virtual pair cells
                     if int(cell_links[0].contents[0]) in self.__virtual_pairs:
                         cell.extract()
+                    # store actual pair cells
                     else:
                         link_cells.append(cell)
                     cells_found = True
+            # gather processed rows
             if cells_found:
                 link_rows.append(row)
+        # detach actual pair cells from the tree
         cells = map(lambda cell: cell.extract(), link_cells)
         for row in link_rows:
             row.extract()
-        while len(cells) >= 20:
-            new_row = content.new_tag('tr')
-            first_cell = content.new_tag('td', **{'class': 'n'})
-            first_cell.string = u'\xa0'
-            new_row.append(first_cell)
-            for cell in cells[0:20]:
-                new_row.append(cell)
-            content.table.append(new_row)
-            del cells[0:20]
-        last_row = content.new_tag('tr')
+        # first filler cell of each new row
         first_cell = content.new_tag('td', **{'class': 'n'})
         first_cell.string = u'\xa0'
-        last_row.append(first_cell)
+        # arrange cells into rows, full rows first
+        while len(cells) >= row_cell_count:
+            new_row = content.new_tag('tr')
+            new_row.append(copy.copy(first_cell))
+            for cell in cells[0:row_cell_count]:
+                new_row.append(cell)
+            content.table.append(new_row)
+            del cells[0:row_cell_count]
+        # last row may or may not be full
+        last_row = content.new_tag('tr')
+        last_row.append(copy.copy(first_cell))
         for cell in cells:
             last_row.append(cell)
-        if len(cells) < 20:
-            last_cell = content.new_tag('td', colspan=20-len(cells))
+        # if it wasn't full, fill it with a col-spanned last cell
+        if len(cells) < row_cell_count:
+            last_cell = content.new_tag('td',
+                                        colspan=row_cell_count-len(cells))
             last_cell.string = u'\xa0'
             last_row.append(last_cell)
         content.table.append(last_row)
         return content
 
+    # fix collected scores tables by removing virtual pair rows
     @__fix_file
     def __fix_collected(self, content):
         rows = content.select('tr')
         for row in rows:
             cells = row.select('td')
+            # "proper" rows should have 7 cells
             if len(cells) == 7:
+                # ignore cells without proper pair numbers
                 try:
                     if int(cells[1].contents[0]) in self.__virtual_pairs:
                         if int(cells[2].contents[0]) in self.__virtual_pairs:
                             row.extract()
                 except ValueError:
                     pass
+            # there are some clearly broken table cells, just throw them away
             if len(cells) == 1 and cells[0]['colspan'] == '7':
                 if cells[0].contents[0] == '&nbsp':
                     row.extract()
         return content
 
+    # fix board travellers, removing virtual tables and leaving one, annotated
     @__fix_file
     def __fix_traveller(self, content):
+        # this should only happen if the traveller wasn't already processed
+        # as it's the only operaton that may yield any results on second run
+        # and it might break stuff
         if not len(content.select('tr.virtualTable')):
-            rows = [
-                row for row
+            # looking for all the rows with more than 2 cells
+            rows = [row for row
                 in content.select('tr')
-                if len(row.select('td')) >= 3
-            ]
+                if len(row.select('td')) >= 3]
+            # only the first "virtual" row needs to be prefixed with a header
             header_added = False
             for row in rows:
                 cells = row.select('td')
+                # if we're already added a header, meaning we're below the first
+                # virtual table, we need to move the row above it
+                # or remove it entirely
                 if header_added:
                     row_below = row.extract()
+                    # only move it if it has meaningful information (10 cells)
                     if len(cells) >= 10:
                         virtual_row.insert_before(row_below)
+                    continue
+                # we're looking for a "proper" row, with at least 10 cells
                 if len(cells) >= 10:
+                    # and with both pair numbers virtual
                     if int(cells[1].contents[0]) in self.__virtual_pairs:
                         if int(cells[2].contents[0]) in self.__virtual_pairs:
+                            # if we're already processed the first one,
+                            # just drop subsequent virtual tables
                             if header_added:
                                 row.extract()
+                            # it's the first virtual table
+                            # prefix it with a header
                             else:
                                 virtual_row = content.new_tag(
                                     'tr',
@@ -223,6 +255,7 @@ class JFRVirtualTable:
                                 virtual_row_header.string = 'Wirtualny stolik:'
                                 virtual_row.append(virtual_row_header)
                                 row.insert_before(virtual_row)
+                                # clear pair numbers
                                 for cell in cells[1:3]:
                                     cell.contents = ''
                                 header_added = True
