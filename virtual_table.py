@@ -297,7 +297,7 @@ if __name__ == '__main__':
         description='Fix display for virtual tables in JFR Pary result pages')
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix')
-    argument_parser.add_argument('--text', metavar='HEADER',
+    argument_parser.add_argument('-t', '--text', metavar='HEADER',
                                  default='Wirtualny stolik:',
                                  help='traveller header for virtual score')
     argument_parser.add_argument('pairs', metavar='PAIR_NO', nargs='*',
