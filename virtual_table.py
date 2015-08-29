@@ -281,7 +281,10 @@ class JFRVirtualTable:
         self.__fix_full_results(self.__full_results_file)
 
     def fix_collected_scores(self):
-        self.__fix_collected(self.__collected_scores_file)
+        if path.isfile(self.__collected_scores_file):
+            self.__fix_collected(self.__collected_scores_file)
+        else:
+            print 'Warning: collected scores not found'
 
     def fix_records_list(self):
         self.__fix_records_list(self.__pair_records_list_file)
