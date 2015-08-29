@@ -58,7 +58,7 @@ class JFRVirtualTable:
         pair_header_match = re.compile('([0-9]{1,}): (.*) - (.*), .*')
         for record_file_path in self.__pair_records_files:
             with file(record_file_path) as record_file:
-                record = bs4(record_file)
+                record = bs4(record_file, 'lxml')
                 # first <td class="o1"> with content matching
                 # pair header is what we're after
                 header = [con for con
@@ -69,11 +69,13 @@ class JFRVirtualTable:
                     header_match = re.match(pair_header_match, header[0])
                     pair_number = int(header_match.group(1))
                     names = filter(len,
-                                   [header_match.group(2),
-                                    header_match.group(3)])
+                                   [header_match.group(2).strip(),
+                                    header_match.group(3).strip()])
                     # virtual pair does not have any names filled
                     if len(names) == 0:
                         virtual_pairs.append(pair_number)
+        if len(virtual_pairs) == 0:
+            print 'Warning: no virtual pairs detected'
         return sorted(virtual_pairs)
 
     # wrapper for DOM manipulation
@@ -81,12 +83,11 @@ class JFRVirtualTable:
     def __fix_file(worker):
         def file_wrapper(self, file_path, encoding='utf-8'):
             with file(file_path, 'r+') as content_file:
-                content = bs4(content_file, from_encoding=encoding)
+                content = bs4(content_file, 'lxml', from_encoding=encoding)
                 content = worker(self, content)
                 content_file.seek(0)
                 content_file.write(
-                    content.prettify(encoding, formatter='html')
-                )
+                    content.prettify(encoding, formatter='html'))
                 content_file.truncate()
         return file_wrapper
 
