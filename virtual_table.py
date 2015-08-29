@@ -3,6 +3,7 @@ import glob
 import re
 import math
 import copy
+import warnings
 
 from os import path
 from bs4 import BeautifulSoup as bs4
@@ -75,7 +76,7 @@ class JFRVirtualTable:
                     if len(names) == 0:
                         virtual_pairs.append(pair_number)
         if len(virtual_pairs) == 0:
-            print 'Warning: no virtual pairs detected'
+            warnings.warn('No virtual pairs detected')
         return sorted(virtual_pairs)
 
     # wrapper for DOM manipulation
@@ -285,7 +286,7 @@ class JFRVirtualTable:
         if path.isfile(self.__collected_scores_file):
             self.__fix_collected(self.__collected_scores_file)
         else:
-            print 'Warning: collected scores not found'
+            warnings.warn('Collected scores file not found')
 
     def fix_records_list(self):
         self.__fix_records_list(self.__pair_records_list_file)
