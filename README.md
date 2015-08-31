@@ -2,18 +2,18 @@
 JFR Pary - wirtualne stoliki
 ============================
 
-NarzÍdzie sprzπtajπce strony wynikÛw z JFR Pary z danych dodanych celem
-porÛwnania uczestnikÛw z wirtualnym sto≥em.
+Narzƒôdzie sprzƒÖtajƒÖce strony wynik√≥w z JFR Pary z danych dodanych celem
+por√≥wnania uczestnik√≥w z wirtualnym sto≈Çem.
 
-Ukrywane sπ:
-* wyniki par ze stolikÛw wirtualnych, rÛwnieø ze zbiorÛwek oraz pe≥nych wynikÛw
-* linki w liúcie historii par
-* zapisy w protoko≥ach
+Ukrywane sƒÖ:
+* wyniki par ze stolik√≥w wirtualnych, r√≥wnie≈º ze zbior√≥wek oraz pe≈Çnych wynik√≥w
+* linki w li≈õcie historii par
+* zapisy w protoko≈Çach
 
-Pierwszy z wirtualnych zapisÛw jest pozostawiany na dole protoko≥u, opatrzony
-nag≥Ûwkiem.
+Pierwszy z wirtualnych zapis√≥w jest pozostawiany na dole protoko≈Çu, opatrzony
+nag≈Ç√≥wkiem.
 
-Przyk≥adowe efekty dzia≥ania:
+Przyk≈Çadowe efekty dzia≈Çania:
 [rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html), 
 [Kadra U-20 z butlerem ligowym](http://emkael.info/brydz/wyniki/2015/u20_szczyrk/ligowe.html).
 
@@ -28,31 +28,31 @@ Wymagania systemowe
 Instalacja
 ----------
 
-åciπgnij zawartoúÊ tego repozytorium.
+≈öciƒÖgnij zawarto≈õƒá tego repozytorium.
 
-Juø, gotowe.
+Ju≈º, gotowe.
 
-Uøycie
+U≈ºycie
 ------
 
 ```
 python virtual_table.py [-t OPIS_STOLIKA] KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [NR_PARY NR_PARY ...]
 ```
 
-Parametry wejúciowe:
-* úcieøka do katalogu stron generowanych przez JFR Pary, wraz z prefiksem
+Parametry wej≈õciowe:
+* ≈õcie≈ºka do katalogu stron generowanych przez JFR Pary, wraz z prefiksem
 turnieju
 
 Opcjonalne parametry:
-* `-t OPIS_STOLIKA` lub `--text OPIS_STOLIKA` pozwala ustawiÊ w≥asny nag≥Ûwek
-stolika w protoko≥ach, zamiast domyúlnego "Wirtualny stolik"
-* `NR_PARY ...` pozwala samodzielnie okreúliÊ numery par na wirtualnych stolikach
+* `-t OPIS_STOLIKA` lub `--text OPIS_STOLIKA` pozwala ustawiƒá w≈Çasny nag≈Ç√≥wek
+stolika w protoko≈Çach, zamiast domy≈õlnego "Wirtualny stolik"
+* `NR_PARY ...` pozwala samodzielnie okre≈õliƒá numery par na wirtualnych stolikach
 
-W przypadku nieokreúlenia numerÛw par, jako pary na stolikach wirtualnych
-traktowane sπ wszystkie pary, ktÛrych imiona i nazwiska sπ puste (wg nag≥ÛwkÛw
-plikÛw historii par).
+W przypadku nieokre≈õlenia numer√≥w par, jako pary na stolikach wirtualnych
+traktowane sƒÖ wszystkie pary, kt√≥rych imiona i nazwiska sƒÖ puste (wg nag≈Ç√≥wk√≥w
+plik√≥w historii par).
 
-Lista przysz≥ych usprawnieÒ
+Lista przysz≈Çych usprawnie≈Ñ
 ---------------------------
 
 Patrz: [`TODO.md`](TODO.md)
@@ -60,7 +60,7 @@ Patrz: [`TODO.md`](TODO.md)
 Autor
 -----
 
-Micha≥ Klichowicz (mkl)
+Micha≈Ç Klichowicz (mkl)
 
 Licencja
 --------
