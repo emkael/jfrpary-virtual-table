@@ -13,7 +13,7 @@ from bs4.element import NavigableString
 class JFRVirtualTable:
 
     def __parse_filepaths(self, prefix):
-        file_path = path.realpath(prefix + '.html')
+        file_path = path.realpath(prefix)
         tournament_path = path.dirname(file_path)
         tournament_prefix = path.splitext(path.basename(file_path))[0]
 
@@ -300,8 +300,17 @@ if __name__ == '__main__':
 
     argument_parser = argparse.ArgumentParser(
         description='Fix display for virtual tables in JFR Pary result pages')
+
+    def file_path(filepath):
+        filepath = unicode(filepath, sys.getfilesystemencoding())
+        if path.isfile(filepath):
+            return filepath
+        else:
+            argument_parser.error('File %s does not exist' % filepath)
+
     argument_parser.add_argument('path', metavar='PATH',
-                                 help='tournament path with JFR prefix')
+                                 help='tournament path with JFR prefix',
+                                 type=file_path)
     argument_parser.add_argument('-t', '--text', metavar='HEADER',
                                  default='Wirtualny stolik:',
                                  help='traveller header for virtual score')
