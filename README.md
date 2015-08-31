@@ -14,7 +14,7 @@ Pierwszy z wirtualnych zapisów jest pozostawiany na dole protokołu, opatrzony
 nagłówkiem.
 
 Przykładowe efekty działania:
-[rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html), 
+[rozdania szkoleniowe z BOOM 2015](http://www.pzbs.pl/wyniki/boom/2015/boom_wirtualne_me.html),
 [Kadra U-20 z butlerem ligowym](http://emkael.info/brydz/wyniki/2015/u20_szczyrk/ligowe.html).
 
 Wymagania systemowe
@@ -36,12 +36,11 @@ Użycie
 ------
 
 ```
-python virtual_table.py [-t OPIS_STOLIKA] KATALOG_ROBOCZY_Z_PREFIKSEM_TURNIEJU [NR_PARY NR_PARY ...]
+python virtual_table.py [-t OPIS_STOLIKA] PLIK_TURNIEJU.html [NR_PARY NR_PARY ...]
 ```
 
 Parametry wejściowe:
-* ścieżka do katalogu stron generowanych przez JFR Pary, wraz z prefiksem
-turnieju
+* ścieżka do pliku PREFIKS.html strony generowanej przez JFR Pary
 
 Opcjonalne parametry:
 * `-t OPIS_STOLIKA` lub `--text OPIS_STOLIKA` pozwala ustawić własny nagłówek
