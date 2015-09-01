@@ -21,9 +21,6 @@ Wymagania systemowe
 -------------------
 
 * system operacyjny MS Windows (testowane na Win7 i Win8.1)
-* sterownik ODBC dla plików MS Access (zwykle obecny domyślnie z Windows,
-weryfikowalny w Panelu Sterowania -> Narzędziach Administracyjnych ->
-Żródła danych ODBC)
 
 LUB
 
