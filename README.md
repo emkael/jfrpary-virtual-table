@@ -20,23 +20,38 @@ Przykładowe efekty działania:
 Wymagania systemowe
 -------------------
 
+* system operacyjny MS Windows (testowane na Win7 i Win8.1)
+* sterownik ODBC dla plików MS Access (zwykle obecny domyślnie z Windows,
+weryfikowalny w Panelu Sterowania -> Narzędziach Administracyjnych ->
+Żródła danych ODBC)
+
+LUB
+
 * python 2.x (testowane i tworzone w wersji 2.7.10)
 * BeautifulSoup4
 * lxml (jako parser dla BS4)
 * argparse
 
+Kompilacja i praca z kodem narzędzia
+------------------------------------
+
+Patrz: [`BUILD.md`](BUILD.md)
+
 Instalacja
 ----------
 
-Ściągnij zawartość tego repozytorium.
+Ściągnij plik wykonywalny z katalogu [`dist`](dist) tego repozytorium.
 
 Już, gotowe.
+
+Na nie-Windowsach wystarczy w analogiczny sposób ściągnąć skrypt źródłowy
+Python: [`virtual_table.py`](src/virtual_table.py).
 
 Użycie
 ------
 
 ```
-python virtual_table.py [-t OPIS_STOLIKA] PLIK_TURNIEJU.html [NR_PARY NR_PARY ...]
+virtual_table.exe [-t OPIS_STOLIKA] PLIK_TURNIEJU.html [NR_PARY NR_PARY ...]
 ```
 
 Parametry wejściowe:
