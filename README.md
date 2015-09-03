@@ -63,6 +63,16 @@ W przypadku nieokreślenia numerów par, jako pary na stolikach wirtualnych
 traktowane są wszystkie pary, których imiona i nazwiska są puste (wg nagłówków
 plików historii par).
 
+Parametry odpowiedzialne za logowanie działania programu:
+* `-q` lub `--quiet` wyłącza wyświetlanie ostrzeżeń na standardowym wyjściu
+błędów
+* `-v` lub `--verbose` włącza wyświetlanie dodatkowych informacji na standadowym
+wyjściu błędów
+* `-l POZIOM` lub `--log-level POZIOM` ustawia poziom logowania zdarzeń do pliku
+(DEBUG, INFO, WARNING, ERROR, CRITICAL; domyślnie: INFO)
+* `-f PLIK_LOG` lub `--log-file PLIK_LOG` ustawia ścieżkę do pliku dziennika
+
+
 Lista przyszłych usprawnień
 ---------------------------
 

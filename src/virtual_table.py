@@ -3,7 +3,7 @@ import glob
 import re
 import math
 import copy
-import warnings
+import logging as log
 
 from os import path
 from bs4 import BeautifulSoup as bs4
@@ -19,8 +19,7 @@ class JFRVirtualTable:
 
         # RegEx matching traveller files for each board
         traveller_files_match = re.compile(
-            re.escape(tournament_prefix) + '([0-9]{3})\.txt'
-        )
+            re.escape(tournament_prefix) + '([0-9]{3})\.txt')
 
         # converts {prefix}{anything}.{ext} filename to full path
         def get_path(relative_path):
@@ -76,7 +75,11 @@ class JFRVirtualTable:
                     if len(names) == 0:
                         virtual_pairs.append(pair_number)
         if len(virtual_pairs) == 0:
-            warnings.warn('No virtual pairs detected')
+            log.getLogger('detect').warning('No virtual pairs detected')
+        else:
+            log.getLogger('detect').info('Virtual pairs: %s',
+                                         ' '.join(sorted(
+                                             map(str, virtual_pairs))))
         return sorted(virtual_pairs)
 
     # wrapper for DOM manipulation
@@ -286,7 +289,10 @@ class JFRVirtualTable:
         if path.isfile(self.__collected_scores_file):
             self.__fix_collected(self.__collected_scores_file)
         else:
-            warnings.warn('Collected scores file not found')
+            log.getLogger(
+                'collected_scores').warning(
+                    'Collected scores file %s not found',
+                    self.__collected_scores_file)
 
     def fix_records_list(self):
         self.__fix_records_list(self.__pair_records_list_file)
@@ -317,7 +323,39 @@ if __name__ == '__main__':
     argument_parser.add_argument('pairs', metavar='PAIR_NO', nargs='*',
                                  type=int, help='virtual pair numbers')
 
+    console_output_args = argument_parser.add_mutually_exclusive_group()
+    console_output_args.add_argument('-q', '--quiet', action='store_true',
+                                     help='suppress warning on STDERR')
+    console_output_args.add_argument('-v', '--verbose', action='store_true',
+                                     help='be verbose on STDERR')
+
+    argument_parser.add_argument('-l', '--log-level', metavar='LEVEL',
+                                 help='file logging verbosity level',
+                                 default='INFO', choices=['DEBUG',
+                                                          'INFO',
+                                                          'WARNING',
+                                                          'ERROR',
+                                                          'CRITICAL'])
+    argument_parser.add_argument('-f', '--log-file', metavar='LOGFILE',
+                                 help='log file path',
+                                 default='virtual_table.log')
+
     arguments = argument_parser.parse_args()
+
+    # primary logging facility - virtual_table.log file
+    log.basicConfig(
+        level=getattr(log, arguments.log_level),
+        format='%(asctime)s %(levelname)-8s %(name)-16s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename=arguments.log_file)
+
+    # secondary logging facility - standard error output
+    console_log = log.StreamHandler()
+    console_log.setLevel(log.INFO if arguments.verbose else (
+        log.ERROR if arguments.quiet else log.WARNING))
+    console_log.setFormatter(log.Formatter(
+        '%(levelname)-8s %(name)-16s: %(message)s'))
+    log.getLogger().addHandler(console_log)
 
     table_parser = JFRVirtualTable(
         path_prefix=arguments.path,
