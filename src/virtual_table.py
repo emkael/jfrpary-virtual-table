@@ -59,21 +59,21 @@ class JFRVirtualTable:
         for record_file_path in self.__pair_records_files:
             with file(record_file_path) as record_file:
                 record = bs4(record_file, 'lxml')
-                # first <td class="o1"> with content matching
-                # pair header is what we're after
-                header = [con for con
-                          in record.select('td.o1')[0].contents
-                          if type(con) is NavigableString and re.match(
-                                  pair_header_match, con)]
-                if len(header):
-                    header_match = re.match(pair_header_match, header[0])
-                    pair_number = int(header_match.group(1))
-                    names = filter(len,
-                                   [header_match.group(2).strip(),
-                                    header_match.group(3).strip()])
-                    # virtual pair does not have any names filled
-                    if len(names) == 0:
-                        virtual_pairs.append(pair_number)
+            # first <td class="o1"> with content matching
+            # pair header is what we're after
+            header = [con for con
+                      in record.select('td.o1')[0].contents
+                      if type(con) is NavigableString and re.search(
+                              pair_header_match, con)]
+            if len(header):
+                header_match = re.match(pair_header_match, header[0])
+                pair_number = int(header_match.group(1))
+                names = filter(len,
+                               [header_match.group(2).strip(),
+                                header_match.group(3).strip()])
+                # virtual pair does not have any names filled
+                if len(names) == 0:
+                    virtual_pairs.append(pair_number)
         if len(virtual_pairs) == 0:
             log.getLogger('detect').warning('No virtual pairs detected')
         else:
