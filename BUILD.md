@@ -65,6 +65,11 @@ Kompilacja do EXE:
 * [PyInstaller](http://pythonhosted.org/PyInstaller/)
 * PyWin32
 
+Znane problemy
+--------------
+
+* PyInstaller nie lubi ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
+
 Kod żródłowy
 ------------
 
