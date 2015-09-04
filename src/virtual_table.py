@@ -204,10 +204,10 @@ class JFRVirtualTable:
                             row.extract()
                 except ValueError:
                     pass
-            # there are some clearly broken table cells, just throw them away
+            # there are some clearly broken table cells, fix them
             if len(cells) == 1 and cells[0]['colspan'] == '7':
                 if cells[0].contents[0] == '&nbsp':
-                    row.extract()
+                    cells[0].contents[0] = u'\xa0'
         return content
 
     # fix board travellers, removing virtual tables and leaving one, annotated
