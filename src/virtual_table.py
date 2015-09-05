@@ -1,5 +1,3 @@
-__version__ = '1.0.1'
-
 import sys
 import glob
 import re
@@ -10,6 +8,8 @@ import logging as log
 from os import path
 from bs4 import BeautifulSoup as bs4
 from bs4.element import NavigableString
+
+__version__ = '1.0.1'
 
 
 class JFRVirtualTable:
@@ -415,8 +415,8 @@ if __name__ == '__main__':
         return unicode(text, sys.getfilesystemencoding())
 
     argument_parser.add_argument('-V', '--version', action='version',
-                        version='%(prog)s {version}'.format(
-                            version=__version__))
+                                 version='%(prog)s {version}'.format(
+                                    version=__version__))
 
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix',
