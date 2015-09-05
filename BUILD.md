@@ -68,7 +68,10 @@ Kompilacja do EXE:
 Znane problemy
 --------------
 
-* PyInstaller nie lubi ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
+* PyInstaller nie lubi kompilować ze ścieżek ze znakami nie-ASCII. `¯\_(ツ)_/¯`
+* co więcej, wersja stabilna produkuje .exe, które nie odpala się z niektórych
+ścieżek nie-ASCII: https://github.com/pyinstaller/pyinstaller/issues/1396
+(.exe dostarczane w `dist` powinno działać)
 
 Kod żródłowy
 ------------
