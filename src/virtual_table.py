@@ -1,3 +1,5 @@
+__version__ = '1.0.1'
+
 import sys
 import glob
 import re
@@ -316,6 +318,10 @@ if __name__ == '__main__':
 
     def decoded_text(text):
         return unicode(text, sys.getfilesystemencoding())
+
+    argument_parser.add_argument('-V', '--version', action='version',
+                        version='%(prog)s {version}'.format(
+                            version=__version__))
 
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix',
