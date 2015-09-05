@@ -299,7 +299,7 @@ class JFRVirtualTable:
 
     def fix_travellers(self):
         for traveller_file in self.__traveller_files:
-            self.__fix_traveller(traveller_file, encoding='iso-8859-2')
+            self.__fix_traveller(traveller_file)
 
 if __name__ == '__main__':
     import argparse
@@ -314,12 +314,16 @@ if __name__ == '__main__':
         else:
             argument_parser.error('File %s does not exist' % filepath)
 
+    def decoded_text(text):
+        return unicode(text, sys.getfilesystemencoding())
+
     argument_parser.add_argument('path', metavar='PATH',
                                  help='tournament path with JFR prefix',
                                  type=file_path)
     argument_parser.add_argument('-t', '--text', metavar='HEADER',
                                  default='Wirtualny stolik:',
-                                 help='traveller header for virtual score')
+                                 help='traveller header for virtual score',
+                                 type=decoded_text)
     argument_parser.add_argument('pairs', metavar='PAIR_NO', nargs='*',
                                  type=int, help='virtual pair numbers')
 
