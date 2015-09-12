@@ -465,14 +465,17 @@ if __name__ == '__main__':
     log.info('-------- program started --------')
     log.debug('parsed arguments: %s', arguments)
 
-    table_parser = JFRVirtualTable(
-        path_prefix=arguments.path,
-        virtual_pairs=arguments.pairs,
-        header_text=arguments.text)
-    table_parser.fix_results()
-    table_parser.fix_full_results()
-    table_parser.fix_collected_scores()
-    table_parser.fix_records_list()
-    table_parser.fix_travellers()
+    try:
+        table_parser = JFRVirtualTable(
+            path_prefix=arguments.path,
+            virtual_pairs=arguments.pairs,
+            header_text=arguments.text)
+        table_parser.fix_results()
+        table_parser.fix_full_results()
+        table_parser.fix_collected_scores()
+        table_parser.fix_records_list()
+        table_parser.fix_travellers()
+    except Exception as e:
+        log.getLogger('root').error(e.strerror)
 
     log.info('--------- program ended ---------')
