@@ -390,8 +390,8 @@ class JFRVirtualTable:
 
     def fix_travellers(self):
         for traveller_file in self.__traveller_files:
-            log.getLogger('traveller').debug('fixing traveller: %s',
-                                             traveller_file)
+            log.getLogger('traveller').info('fixing traveller: %s',
+                                            traveller_file)
             try:
                 self.__fix_traveller(traveller_file)
             except UserWarning as warn:
