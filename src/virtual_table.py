@@ -31,6 +31,7 @@ def bs4_fix_file(worker_method):
             content_file.truncate()
     return file_wrapper
 
+
 def fill_pair_list_table(cells, row_cell_count=20):
     """ Formats cell list into well-formed rows, aligned by column count.
     """
@@ -68,6 +69,7 @@ def fill_pair_list_table(cells, row_cell_count=20):
                                         last_cell)
     content.table.append(last_row)
     return content.table.contents
+
 
 class JFRVirtualTable(object):
     """ Virtual tables formatter (for JFR Pary pages)
@@ -176,7 +178,8 @@ class JFRVirtualTable(object):
         else:
             log.getLogger('detect').info('virtual pairs: %s',
                                          ' '.join(sorted(
-                                             [str(pair) for pair in virtual_pairs])))
+                                             [str(pair) for pair
+                                              in virtual_pairs])))
         return sorted(virtual_pairs)
 
     @bs4_fix_file
@@ -433,6 +436,7 @@ class JFRVirtualTable(object):
             except UserWarning as warn:
                 log.getLogger('traveller').warning('%s: %s',
                                                    traveller_file, warn)
+
 
 def main():
     """ Program entry point, invoked when __name__ is __main__
