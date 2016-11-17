@@ -70,7 +70,7 @@ def fill_pair_list_table(cells, row_cell_count=20):
         log.getLogger('rec_list').debug('filling last row with: %s',
                                         last_cell)
     content.table.append(last_row)
-    return content.table.contents
+    return content.table.contents[:]
 
 
 class JFRVirtualTable(object):
