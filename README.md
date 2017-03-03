@@ -37,7 +37,7 @@ Patrz: [`BUILD.md`](BUILD.md)
 Instalacja
 ----------
 
-Ściągnij plik wykonywalny z katalogu [`dist`](dist) tego repozytorium.
+Ściągnij plik wykonywalny ze [strony autora](//emkael.github.io/_files/pary-virtual-table/virtual_table.exe).
 
 Już, gotowe.
 
